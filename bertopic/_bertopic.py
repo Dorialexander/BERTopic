@@ -279,9 +279,11 @@ class BERTopic:
         if embeddings is None:
             self.embedding_model = select_backend(self.embedding_model,
                                                   language=self.language)
-            original_embeddings = self._extract_embeddings(documents.Document,
+            embeddings = self._extract_embeddings(documents.Document,
                                                   method="document",
                                                   verbose=self.verbose)
+            
+            original_embeddings = embeddings
             logger.info("Transformed documents to Embeddings")
         else:
             if self.embedding_model is not None:
@@ -290,7 +292,7 @@ class BERTopic:
 
         # Reduce dimensionality with UMAP
         if self.seed_topic_list is not None and self.embedding_model is not None:
-            y, embeddings = self._guided_topic_modeling(original_embeddings)
+            y, embeddings = self._guided_topic_modeling(embeddings)
         umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
         # Cluster UMAP embeddings with HDBSCAN
