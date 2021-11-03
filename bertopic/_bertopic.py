@@ -279,7 +279,7 @@ class BERTopic:
         if embeddings is None:
             self.embedding_model = select_backend(self.embedding_model,
                                                   language=self.language)
-            embeddings = self._extract_embeddings(documents.Document,
+            original_embeddings = self._extract_embeddings(documents.Document,
                                                   method="document",
                                                   verbose=self.verbose)
             logger.info("Transformed documents to Embeddings")
@@ -290,7 +290,7 @@ class BERTopic:
 
         # Reduce dimensionality with UMAP
         if self.seed_topic_list is not None and self.embedding_model is not None:
-            y, embeddings = self._guided_topic_modeling(embeddings)
+            y, embeddings = self._guided_topic_modeling(original_embeddings)
         umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
         # Cluster UMAP embeddings with HDBSCAN
@@ -311,7 +311,7 @@ class BERTopic:
         probabilities = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
 
-        return predictions, probabilities
+        return predictions, probabilities, original_embeddings
 
     def transform(self,
                   documents: Union[str, List[str]],
